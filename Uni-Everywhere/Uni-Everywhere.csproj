@@ -133,6 +133,7 @@
     <Compile Include="Models\University.cs" />
     <Compile Include="Models\Uni_EverywhereContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UniHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />

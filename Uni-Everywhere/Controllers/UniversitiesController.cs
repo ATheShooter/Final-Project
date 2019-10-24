@@ -46,19 +46,28 @@ namespace Uni_Everywhere.Models
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,ImageFile,ImagePath,score,description")] University university)
+        public ActionResult Create([Bind(Include = "Id,Name,ImageFile,ImagePath,score,description")] UniHelper unihelper)
         {
-
+            University university = new University();
 
 
             if (ModelState.IsValid) {
 
+                
 
-                string pic = System.IO.Path.GetFileName(university.ImageFile.FileName);
-                string path = System.IO.Path.Combine(
-                Server.MapPath("~/Images/Uni"), pic);
-                university.ImageFile.SaveAs(path);
-                university.ImagePath = "~/Images/Uni" + pic;
+                  string pic = System.IO.Path.GetFileName(unihelper.ImageFile.FileName);
+                  string path = System.IO.Path.Combine(
+                  Server.MapPath("~/Images/Uni"), pic);
+                  unihelper.ImageFile.SaveAs(path);
+                
+
+                university.Id = unihelper.Id;
+                university.Name = unihelper.Name;
+                university.ImagePath = "~/Images/Uni" +pic;
+                university.score = unihelper.score;
+                university.description = unihelper.description;
+                
+
                 db.Universities.Add(university);
                 db.SaveChanges();
                 return RedirectToAction("Index");
