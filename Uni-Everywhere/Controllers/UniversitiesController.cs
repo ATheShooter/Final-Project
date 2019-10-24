@@ -7,12 +7,13 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 
+
 namespace Uni_Everywhere.Models
 {
     public class UniversitiesController : Controller
     {
         private Uni_EverywhereContext db = new Uni_EverywhereContext();
-
+       
         // GET: Universities
         public ActionResult Index()
         {
@@ -45,32 +46,29 @@ namespace Uni_Everywhere.Models
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Name,ImagePath,score,description")] University university)
+        public ActionResult Create([Bind(Include = "Id,Name,ImageFile,ImagePath,score,description")] University university)
         {
-            if (ModelState.IsValid)
-            {
+
+
+
+            if (ModelState.IsValid) {
+
+
+                string pic = System.IO.Path.GetFileName(university.ImageFile.FileName);
+                string path = System.IO.Path.Combine(
+                Server.MapPath("~/Images/Uni"), pic);
+                university.ImageFile.SaveAs(path);
+                university.ImagePath = "~/Images/Uni" + pic;
                 db.Universities.Add(university);
                 db.SaveChanges();
                 return RedirectToAction("Index");
-            }
 
+            }
             return View(university);
         }
 
-        // GET: Universities/Edit/5
-        public ActionResult Edit(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            University university = db.Universities.Find(id);
-            if (university == null)
-            {
-                return HttpNotFound();
-            } 
-            return View(university);
-        }
+
+     
 
         // POST: Universities/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -116,7 +114,7 @@ namespace Uni_Everywhere.Models
 
         public ActionResult Review(int id)
         {
-            var comments = db.Review.Where
+            var Reviews = db.Reviews.Find(id);
             return Json(Reviews, JsonRequestBehavior.AllowGet);
         }
         protected override void Dispose(bool disposing)
