@@ -1,9 +1,11 @@
-﻿using System;
+﻿using PusherServer;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -13,7 +15,7 @@ namespace Uni_Everywhere.Models
     public class UniversitiesController : Controller
     {
         private Uni_EverywhereContext db = new Uni_EverywhereContext();
-       
+
         // GET: Universities
         public ActionResult Index()
         {
@@ -27,14 +29,43 @@ namespace Uni_Everywhere.Models
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            University university = db.Universities.Find(id);
-            if (university == null)
+            UniDetailsViewrs UDV = new UniDetailsViewrs();
+            UDV.Uni = db.Universities.Find(id);
+
+            UDV.Reviews = GetReviews(id);
+
+            if (UDV == null)
             {
                 return HttpNotFound();
             }
-            return View(university);
+            return View(UDV);
         }
 
+        public IEnumerable<Review> GetReviews(int? id)
+        {
+            var list = (from recordset in db.Reviews
+                    where recordset.UniversityId == id
+                    select new
+                    {
+                        Author = recordset.Author,
+                        Id = recordset.Id,
+                        Content = recordset.Content,
+                        Date = recordset.Date,
+                        UniversityId = recordset.UniversityId
+                    }).ToList().Select(r => new Review
+                    {
+
+                        Author = r.Author,
+                        Id = r.Id,
+                        Content = r.Content,
+                        Date = r.Date,
+                        UniversityId = r.UniversityId
+
+                    });
+
+            return list;
+                 
+        }
         // GET: Universities/Create
         public ActionResult Create()
         {
@@ -51,22 +82,24 @@ namespace Uni_Everywhere.Models
             University university = new University();
 
 
-            if (ModelState.IsValid) {
+            if (ModelState.IsValid)
+            {
 
-                
 
-                  string pic = System.IO.Path.GetFileName(unihelper.ImageFile.FileName);
-                  string path = System.IO.Path.Combine(
-                  Server.MapPath("~/Images/Uni"), pic);
-                  unihelper.ImageFile.SaveAs(path);
-                
+
+                string pic = System.IO.Path.GetFileName(unihelper.ImageFile.FileName);
+                string path = System.IO.Path.Combine(
+                Server.MapPath("~/Images/Uni/"), pic);
+                unihelper.ImageFile.SaveAs(path);
+
 
                 university.Id = unihelper.Id;
                 university.Name = unihelper.Name;
-                university.ImagePath = "~/Images/Uni" +pic;
+                university.ImagePath = "~/Images/Uni/" + pic;
+                // university.ImagePath = path;
                 university.score = unihelper.score;
                 university.description = unihelper.description;
-                
+
 
                 db.Universities.Add(university);
                 db.SaveChanges();
@@ -77,7 +110,7 @@ namespace Uni_Everywhere.Models
         }
 
 
-     
+
 
         // POST: Universities/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -94,6 +127,19 @@ namespace Uni_Everywhere.Models
             }
             return View(university);
         }
+
+        public ActionResult Edit(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+               
+            }
+
+            University university = db.Universities.Find(id);
+            return View(university);
+        }
+
 
         // GET: Universities/Delete/5
         public ActionResult Delete(int? id)
@@ -121,11 +167,28 @@ namespace Uni_Everywhere.Models
             return RedirectToAction("Index");
         }
 
-        public ActionResult Review(int id)
+
+        [HttpPost]
+        public ActionResult Review([Bind(Include = "Author,Content,UniversityId")]Review data)
         {
-            var Reviews = db.Reviews.Find(id);
-            return Json(Reviews, JsonRequestBehavior.AllowGet);
-        }
+            if(!data.Equals(null))
+            {
+                data.Date = DateTime.Now;
+                if(data.UniversityId.Equals(null))
+                    throw new ArgumentNullException("UniversityID property is null");
+
+                System.Diagnostics.Debug.WriteLine(data.Author + " " + data.Content + "time " + data.Date);
+
+                db.Reviews.Add(data);
+                db.SaveChanges();
+                  //  System.Diagnostics.Debug.WriteLine("Saved to databae succesfuly");
+                }
+                    
+                return RedirectToAction("Details", new { id = data.UniversityId });
+            }
+
+
+        
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -136,3 +199,6 @@ namespace Uni_Everywhere.Models
         }
     }
 }
+
+
+

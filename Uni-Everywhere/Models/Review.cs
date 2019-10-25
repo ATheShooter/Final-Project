@@ -18,5 +18,7 @@ namespace Uni_Everywhere.Models
 
 
         public int UniversityId { get; set; }
+
+        
     }
 }

@@ -14,8 +14,8 @@ namespace Uni_Everywhere
     {
         protected void Application_Start()
         {
-            
-            
+
+          //  Database.SetInitializer<Uni_EverywhereContext>(new DropCreateDatabaseIfModelChanges<Uni_EverywhereContext>());
             Database.SetInitializer<Uni_EverywhereContext>(new DropCreateDatabaseAlways<Uni_EverywhereContext>());
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

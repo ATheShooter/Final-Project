@@ -1,8 +1,25 @@
-﻿@model Uni_Everywhere.Models.University
+﻿@model Uni_Everywhere.UniDetailsViewrs
+
 
 @{
     ViewBag.Title = "Details";
 }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+<script src="//js.pusher.com/4.0/pusher.min.js"></script>
+
+<style>
+    .user_name {
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .comments-list .media {
+        border-bottom: 1px dotted #ccc;
+    }
+</style>
+
+
 
 <h2>Details</h2>
 
@@ -11,40 +28,142 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Name)
+
+            @Html.DisplayNameFor(model => model.Uni.Name)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => model.Uni.Name)
         </dd>
 
         <dt>
-           <img rec @Html.DisplayNameFor(model => model.ImagePath)
+            @Html.DisplayNameFor(model => model.Uni.ImagePath)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.ImagePath)
+
+            <img src="@Url.Content(Model.Uni.ImagePath)" alt="uni Image" />
+            <!--  Html.DisplayFor(model => model.ImagePath) -->
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.score)
+            @Html.DisplayNameFor(model => model.Uni.score)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.score)
+            @Html.DisplayFor(model => model.Uni.score)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.description)
+            @Html.DisplayNameFor(model => model.Uni.description)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.description)
+            @Html.DisplayFor(model => model.Uni.description)
         </dd>
+
+
 
     </dl>
 </div>
-<p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
-    @Html.ActionLink("Back to List", "Index")
-</p>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="page-header">
+                <h1><small class="pull-right"> reviews</small> Reviews </h1>
+            </div>
+            <div class="comments-list">
+                <div class="media" v-for="com in comments">
+                    <div class="media-body">
+                        @foreach (var Rev in Model.Reviews)
+                        {
+
+                            <h1></h1>
+                            <h4 class="media-heading user_name">@Rev.Author</h4>
+                            @Rev.Content
+
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+ 
+
+    @using (Html.BeginForm("Review", "Universities", FormMethod.Post))
+    {
+
+        <div class="container">
+            <br />
+            <p>Your Comment</p>
+            <form onsubmit="return false;">
+                <input type="text" name="Author" />
+                <textarea rows="3" placeholder="Your Comment" id="Body" class="form-control" name="Content"></textarea>
+                <input type="hidden" name="UniversityId" value="@Model.Uni.Id" />
+                <input type="submit" value="Add" />
+        </div>
+    }
+    <p>
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Uni.Id }) |
+        @Html.ActionLink("Back to List", "Index")
+    </p>
+
+    <div></div>
+
+    @*<script>
+            var pusher = new Pusher('XXX_APP_KEY', {
+                cluster: 'XXX_APP_CLUSTER'
+            });
+            var my_channel = pusher.subscribe('asp_channel');
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    reviews: [],
+                    review: {
+                        Author: '',
+                        Content: '',
+                        UniversityId: @Model.Id
+                    }
+                },
+                created: function() {
+                    this.get_reviews();
+                    this.listen();
+                },
+                methods: {
+                   get_reviews: function() {
+                        axios.get('@Url.Action("Reviews", "Universities", new { id = @Model.Id }, protocol: Request.Url.Scheme)')
+                            .then((response) => {
+
+                                this.reviews = response.data;
+
+                            });
+
+                    },
+                    listen: function() {
+                        my_channel.bind("asp_event", (data) => {
+                            if (data.UniversityId == this.review.UniversityId) {
+                                this.reviews.push(data);
+                            }
+
+                        })
+                    },
+                    submit_review: function() {
+                        axios.post('@Url.Action("Review", "Universities", new {}, protocol: Request.Url.Scheme)', this.review)
+                            .then((response) => {
+                                this.review.Author = '';
+                                this.review.Content = '';
+                                alert("Review Submitted");
+
+                            });
+                    }
+                }
+            });
+        </script>*@
